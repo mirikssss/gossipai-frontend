@@ -229,7 +229,13 @@ class ApiClient {
     const requestBody: any = { text };
     if (additionalPrompt) requestBody.additional_prompt = additionalPrompt;
     if (presetId) requestBody.preset_id = presetId;
-    if (temperature) requestBody.temperature = temperature;
+    if (temperature !== undefined && temperature !== null) {
+      // Ensure temperature is a valid number
+      const tempValue = typeof temperature === 'string' ? parseFloat(temperature) : temperature;
+      if (!isNaN(tempValue)) {
+        requestBody.temperature = tempValue;
+      }
+    }
 
     try {
       // Try the public endpoint first (no authentication required)
@@ -291,7 +297,13 @@ class ApiClient {
     formData.append('file', file);
     if (additionalPrompt) formData.append('additional_prompt', additionalPrompt);
     if (presetId) formData.append('preset_id', presetId);
-    if (temperature) formData.append('temperature', temperature.toString());
+    if (temperature !== undefined && temperature !== null) {
+      // Ensure temperature is a valid number
+      const tempValue = typeof temperature === 'string' ? parseFloat(temperature) : temperature;
+      if (!isNaN(tempValue)) {
+        formData.append('temperature', tempValue.toString());
+      }
+    }
 
     try {
       // Using custom fetch for FormData, ensure HTTPS
@@ -366,7 +378,13 @@ class ApiClient {
     
     if (additionalPrompt) formData.append('additional_prompt', additionalPrompt);
     if (presetId) formData.append('preset_id', presetId);
-    if (temperature) formData.append('temperature', temperature.toString());
+    if (temperature !== undefined && temperature !== null) {
+      // Ensure temperature is a valid number
+      const tempValue = typeof temperature === 'string' ? parseFloat(temperature) : temperature;
+      if (!isNaN(tempValue)) {
+        formData.append('temperature', tempValue.toString());
+      }
+    }
 
     try {
       // Using custom fetch for FormData, ensure HTTPS
