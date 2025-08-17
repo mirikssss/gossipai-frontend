@@ -335,10 +335,10 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-min">
+      <div className="grid-cards-mobile">
         {/* Summary Card */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <Card className="bg-card/50 backdrop-blur border-neon-purple/20 h-full">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="card-container">
+          <Card className="bg-card/50 backdrop-blur border-neon-purple/20 h-full w-full">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <FileText className="w-5 h-5 text-neon-purple" />
@@ -386,8 +386,9 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
+          className="card-container"
         >
-          <Card className="bg-card/50 backdrop-blur border-neon-blue/20 h-full">
+          <Card className="bg-card/50 backdrop-blur border-neon-blue/20 h-full w-full">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Shield className="w-5 h-5 text-neon-blue" />
