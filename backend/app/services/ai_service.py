@@ -43,8 +43,9 @@ class AIService:
             
             # Check if credentials are set
             if not settings.GOOGLE_APPLICATION_CREDENTIALS:
-                logger.error("GOOGLE_APPLICATION_CREDENTIALS not set in settings")
-                return await AIService.mock_analysis_result(preset_id)
+                logger.warning("GOOGLE_APPLICATION_CREDENTIALS not set in settings")
+                logger.info("Attempting to use default credentials...")
+                # Try to continue without explicit credentials
             
             # Check if credentials file exists
             creds_path = settings.GOOGLE_APPLICATION_CREDENTIALS
