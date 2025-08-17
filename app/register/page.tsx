@@ -29,6 +29,25 @@ export default function RegisterPage() {
     setIsLoading(true)
     setError("")
 
+    // Frontend validation
+    if (!formData.name || formData.name.trim().length < 2) {
+      setError("Имя должно содержать минимум 2 символа")
+      setIsLoading(false)
+      return
+    }
+
+    if (!formData.email || !formData.email.includes('@')) {
+      setError("Введите корректный email адрес")
+      setIsLoading(false)
+      return
+    }
+
+    if (!formData.password || formData.password.length < 6) {
+      setError("Пароль должен содержать минимум 6 символов")
+      setIsLoading(false)
+      return
+    }
+
     // Debug logging
     console.log("Registration form data:", formData)
     console.log("Sending to API:", {
@@ -79,14 +98,14 @@ export default function RegisterPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium">
-                  Имя
+                  Имя пользователя
                 </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Ваше имя"
+                    placeholder="Введите ваше имя (например: Иван)"
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="pl-10"
@@ -98,14 +117,14 @@ export default function RegisterPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
-                  Email
+                  Email адрес
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder="Введите email (например: ivan@example.com)"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className="pl-10"
@@ -124,12 +143,12 @@ export default function RegisterPage() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Минимум 8 символов"
+                    placeholder="Введите пароль (минимум 6 символов)"
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
                     className="pl-10 pr-10"
                     required
-                    minLength={8}
+                    minLength={6}
                     disabled={isLoading}
                   />
                   <Button
