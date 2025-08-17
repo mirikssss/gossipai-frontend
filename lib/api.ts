@@ -302,7 +302,9 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`API: HTTP error ${response.status}:`, errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       return await response.json();
@@ -355,12 +357,17 @@ class ApiClient {
     files.forEach((file, index) => {
       formData.append(`files`, file);
     });
+    
+    // Add file order for multiple files
+    const fileOrder = Array.from({ length: files.length }, (_, i) => i.toString());
+    formData.append('file_order', JSON.stringify(fileOrder));
+    
     if (presetId) formData.append('preset_id', presetId);
     if (temperature) formData.append('temperature', temperature.toString());
 
     try {
       // Using custom fetch for FormData, ensure HTTPS
-      const url = `${API_BASE_URL}/analysis/upload`.replace(/^http:\/\//i, 'https://');
+      const url = `${API_BASE_URL}/analysis/upload-multiple`.replace(/^http:\/\//i, 'https://');
       console.log('API: Uploading multiple files to:', url);
       const response = await fetch(url, {
         method: 'POST',
