@@ -206,14 +206,15 @@
   
   /* Mobile card layout fixes */
   .grid-cards-mobile {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
     width: 100%;
   }
   
   @media (min-width: 1280px) {
     .grid-cards-mobile {
+      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
     }
@@ -225,10 +226,12 @@
     max-width: 100%;
     overflow: hidden;
     position: relative;
+    flex-shrink: 0;
   }
   
   .card-container > * {
     width: 100%;
     max-width: 100%;
+    flex-shrink: 0;
   }
 }
