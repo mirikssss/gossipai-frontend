@@ -223,12 +223,18 @@ class ApiClient {
   }
 
   // Analysis methods
-  async analyzeText(text: string, presetId?: string, temperature?: number) {
+  async analyzeText(text: string, additionalPrompt?: string, presetId?: string, temperature?: number) {
     console.log('API: отправка запроса анализа текста');
     
     const requestBody: any = { text };
+    if (additionalPrompt) requestBody.additional_prompt = additionalPrompt;
     if (presetId) requestBody.preset_id = presetId;
-    if (temperature) requestBody.temperature = temperature;
+    if (temperature !== undefined && temperature !== null) {
+      const tempValue = typeof temperature === 'string' ? parseFloat(temperature) : temperature;
+      if (!isNaN(tempValue)) {
+        requestBody.temperature = tempValue;
+      }
+    }
 
     try {
       // Try the public endpoint first (no authentication required)
@@ -285,11 +291,17 @@ class ApiClient {
     }
   }
 
-  async analyzeFile(file: File, presetId?: string, temperature?: number) {
+  async analyzeFile(file: File, additionalPrompt?: string, presetId?: string, temperature?: number) {
     const formData = new FormData();
     formData.append('file', file);
+    if (additionalPrompt) formData.append('additional_prompt', additionalPrompt);
     if (presetId) formData.append('preset_id', presetId);
-    if (temperature) formData.append('temperature', temperature.toString());
+    if (temperature !== undefined && temperature !== null) {
+      const tempValue = typeof temperature === 'string' ? parseFloat(temperature) : temperature;
+      if (!isNaN(tempValue)) {
+        formData.append('temperature', tempValue.toString());
+      }
+    }
 
     try {
       // Using custom fetch for FormData, ensure HTTPS
@@ -352,7 +364,7 @@ class ApiClient {
     }
   }
 
-  async analyzeMultipleFiles(files: File[], presetId?: string, temperature?: number) {
+  async analyzeMultipleFiles(files: File[], additionalPrompt?: string, presetId?: string, temperature?: number) {
     const formData = new FormData();
     files.forEach((file, index) => {
       formData.append(`files`, file);
@@ -362,8 +374,14 @@ class ApiClient {
     const fileOrder = Array.from({ length: files.length }, (_, i) => i.toString());
     formData.append('file_order', JSON.stringify(fileOrder));
     
+    if (additionalPrompt) formData.append('additional_prompt', additionalPrompt);
     if (presetId) formData.append('preset_id', presetId);
-    if (temperature) formData.append('temperature', temperature.toString());
+    if (temperature !== undefined && temperature !== null) {
+      const tempValue = typeof temperature === 'string' ? parseFloat(temperature) : temperature;
+      if (!isNaN(tempValue)) {
+        formData.append('temperature', tempValue.toString());
+      }
+    }
 
     try {
       // Using custom fetch for FormData, ensure HTTPS
@@ -469,6 +487,31 @@ class ApiClient {
 
   async getHistoryItem(id: string) {
     return await this.request<AnalysisResult>(`/history/${id}`);
+  }
+
+  async getHistoryDetail(id: string) {
+    return await this.request<AnalysisResult>(`/history/${id}`);
+  }
+
+  public formatDate(dateString: string): { date: string; time: string } {
+    try {
+      const date = new Date(dateString);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return {
+        date: `${day}.${month}.${year}`,
+        time: `${hours}:${minutes}`
+      };
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return {
+        date: 'Неизвестно',
+        time: 'Неизвестно'
+      };
+    }
   }
 
   async deleteHistoryItem(id: string) {
