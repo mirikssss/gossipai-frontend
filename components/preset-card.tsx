@@ -12,6 +12,16 @@ interface PresetCardProps {
     description: string
     color: string
     icon: string
+    target_audience?: string
+    report_style?: string[]
+    focus_analysis?: string[]
+    temperature?: number
+    custom_cards?: Array<{
+      id: string
+      name: string
+      icon: string
+      description: string
+    }>
   }
   isSelected?: boolean
   onSelect?: () => void

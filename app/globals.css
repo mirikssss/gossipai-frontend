@@ -184,4 +184,23 @@
   .border-neon-turquoise {
     border-color: var(--neon-turquoise);
   }
+  
+  /* Custom animations for button */
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-spin-slow {
+    animation: spin-slow 3s linear infinite;
+  }
+  
+  .button-hover-effect:hover {
+    box-shadow: 0 0 15px var(--glow-blue);
+    transform: translateY(-2px) scale(1.02);
+  }
 }

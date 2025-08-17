@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Wix_Madefor_Display } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
 
 const wixMadefor = Wix_Madefor_Display({
   subsets: ["latin", "cyrillic"],
@@ -22,10 +23,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ru" className={wixMadefor.variable}>
+    <html lang="ru" className={wixMadefor.variable} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

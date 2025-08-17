@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, LayoutDashboard, History, Settings, Sliders, LogOut } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+import { apiClient } from "@/lib/api"
 
 const navigation = [
   {
@@ -41,6 +42,18 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await apiClient.logout()
+      router.push("/")
+    } catch (error) {
+      console.error("Logout error:", error)
+      // Force redirect even if logout fails
+      router.push("/")
+    }
+  }
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div className="flex h-full flex-col">
@@ -80,10 +93,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <Button
           variant="ghost"
           className="w-full justify-start text-muted-foreground hover:text-foreground"
-          onClick={() => {
-            // Handle logout
-            console.log("Logout")
-          }}
+          onClick={handleLogout}
         >
           <LogOut className="h-5 w-5 mr-3" />
           Выйти

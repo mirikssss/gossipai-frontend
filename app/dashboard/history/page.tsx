@@ -1,81 +1,64 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { EmptyState } from "@/components/empty-state"
 import { HistoryCard } from "@/components/history-card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Filter } from "lucide-react"
+import { Search, Filter, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
-
-// Mock history data
-const mockHistory = [
-  {
-    id: "1",
-    title: "Рабочий разговор с коллегой",
-    date: "2024-01-15",
-    time: "14:30",
-    participants: 2,
-    messageCount: 15,
-    overallScore: 72,
-    dominantEmotion: "Беспокойство",
-    fileName: "work_chat.txt",
-    preview: "Разговор между двумя коллегами о рабочем проекте...",
-  },
-  {
-    id: "2",
-    title: "Семейная беседа",
-    date: "2024-01-14",
-    time: "19:45",
-    participants: 3,
-    messageCount: 28,
-    overallScore: 85,
-    dominantEmotion: "Радость",
-    fileName: "family_chat.txt",
-    preview: "Обсуждение планов на выходные с семьей...",
-  },
-  {
-    id: "3",
-    title: "Переговоры с клиентом",
-    date: "2024-01-13",
-    time: "11:20",
-    participants: 2,
-    messageCount: 22,
-    overallScore: 68,
-    dominantEmotion: "Напряжение",
-    fileName: "client_meeting.txt",
-    preview: "Обсуждение условий контракта и сроков...",
-  },
-  {
-    id: "4",
-    title: "Дружеская переписка",
-    date: "2024-01-12",
-    time: "16:15",
-    participants: 2,
-    messageCount: 45,
-    overallScore: 92,
-    dominantEmotion: "Веселье",
-    fileName: "friend_chat.txt",
-    preview: "Обмен новостями и планирование встречи...",
-  },
-]
+import { apiClient, HistoryItem } from "@/lib/api"
+import { useRouter } from "next/navigation"
 
 export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState("date")
   const [filterBy, setFilterBy] = useState("all")
+  const [history, setHistory] = useState<HistoryItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
-  const filteredHistory = mockHistory.filter((item) => {
+  useEffect(() => {
+    fetchHistory()
+  }, [])
+
+  const fetchHistory = async () => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      console.log("Fetching history data...");
+      const historyData = await apiClient.getHistory();
+      console.log("History data received:", historyData);
+      
+      if (!historyData || historyData.length === 0) {
+        console.log("No history data found");
+      }
+      
+      setHistory(Array.isArray(historyData) ? historyData : []);
+    } catch (err) {
+      console.error("Failed to fetch history:", err);
+      setError("Не удалось загрузить историю анализов");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+  
+  const handleDeleteHistoryItem = (id: string) => {
+    setHistory(prev => prev.filter(item => item.id !== id))
+  }
+
+  const filteredHistory = history.filter((item) => {
     const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.preview.toLowerCase().includes(searchQuery.toLowerCase())
+      item.title.toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesFilter =
       filterBy === "all" ||
-      (filterBy === "high" && item.overallScore >= 80) ||
-      (filterBy === "medium" && item.overallScore >= 60 && item.overallScore < 80) ||
-      (filterBy === "low" && item.overallScore < 60)
+      (filterBy === "high" && item.overall_score >= 80) ||
+      (filterBy === "medium" && item.overall_score >= 60 && item.overall_score < 80) ||
+      (filterBy === "low" && item.overall_score < 60)
 
     return matchesSearch && matchesFilter
   })
@@ -84,9 +67,9 @@ export default function HistoryPage() {
     if (sortBy === "date") {
       return new Date(b.date).getTime() - new Date(a.date).getTime()
     } else if (sortBy === "score") {
-      return b.overallScore - a.overallScore
+      return b.overall_score - a.overall_score
     } else if (sortBy === "messages") {
-      return b.messageCount - a.messageCount
+      return b.message_count - a.message_count
     }
     return 0
   })
@@ -108,7 +91,23 @@ export default function HistoryPage() {
           <p className="text-muted-foreground">Просматривайте и управляйте всеми вашими предыдущими анализами</p>
         </motion.div>
 
-        {mockHistory.length > 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neon-purple mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Загрузка истории анализов...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="p-4 rounded-lg bg-red-50/10 border border-red-500/20 text-center"
+          >
+            <p className="text-red-500">{error}</p>
+          </motion.div>
+        ) : history.length > 0 ? (
           <>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -119,7 +118,7 @@ export default function HistoryPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
-                  placeholder="Поиск по названию или содержанию..."
+                  placeholder="Поиск по названию..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 bg-background/50 border-neon-blue/20 focus:border-neon-blue/40"
@@ -159,7 +158,7 @@ export default function HistoryPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                 >
-                  <HistoryCard item={item} />
+                  <HistoryCard item={item} onDelete={handleDeleteHistoryItem} />
                 </motion.div>
               ))}
             </div>

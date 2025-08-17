@@ -11,18 +11,29 @@ import { Eye, EyeOff, Mail, Lock } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { apiClient } from "@/lib/api"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login logic here
-    console.log("Login attempt:", { email, password })
-    router.push("/dashboard")
+    setIsLoading(true)
+    setError("")
+
+    try {
+      await apiClient.login(email, password)
+      router.push("/dashboard")
+    } catch (err) {
+      setError("Неверный email или пароль")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -44,6 +55,12 @@ export default function LoginPage() {
 
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md">
+                  {error}
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -58,6 +75,7 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -76,6 +94,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10"
                     required
+                    disabled={isLoading}
                   />
                   <Button
                     type="button"
@@ -83,14 +102,15 @@ export default function LoginPage() {
                     size="sm"
                     className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg">
-                Войти
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? "Вход..." : "Войти"}
               </Button>
             </form>
 

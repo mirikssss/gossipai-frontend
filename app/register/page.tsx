@@ -11,6 +11,7 @@ import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { apiClient } from "@/lib/api"
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -19,13 +20,23 @@ export default function RegisterPage() {
     email: "",
     password: "",
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle registration logic here
-    console.log("Registration attempt:", formData)
-    router.push("/dashboard")
+    setIsLoading(true)
+    setError("")
+
+    try {
+      await apiClient.register(formData.name, formData.email, formData.password)
+      router.push("/dashboard")
+    } catch (err) {
+      setError("Ошибка при регистрации. Попробуйте еще раз.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -51,6 +62,12 @@ export default function RegisterPage() {
 
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md">
+                  {error}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium">
                   Имя
@@ -65,6 +82,7 @@ export default function RegisterPage() {
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="pl-10"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -83,6 +101,7 @@ export default function RegisterPage() {
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className="pl-10"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -102,6 +121,7 @@ export default function RegisterPage() {
                     className="pl-10 pr-10"
                     required
                     minLength={8}
+                    disabled={isLoading}
                   />
                   <Button
                     type="button"
@@ -109,14 +129,15 @@ export default function RegisterPage() {
                     size="sm"
                     className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg">
-                Создать аккаунт
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? "Создание аккаунта..." : "Создать аккаунт"}
               </Button>
             </form>
 
