@@ -7,16 +7,16 @@ baseUrl = baseUrl.replace(/^http:\/\//i, 'https://');
 // Make sure we don't have double slashes in the API URL
 const API_BASE_URL = `${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}api/v1`;
 
+// Hard fail if API_BASE_URL is still using HTTP
+if (API_BASE_URL.startsWith('http://')) {
+  throw new Error(`Insecure API_BASE_URL detected: ${API_BASE_URL}`);
+}
+
 // Debug logging
 if (typeof window !== 'undefined') {
   console.log('API_BASE_URL:', API_BASE_URL);
   console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
   console.log('Environment check - Mixed Content fix applied');
-  
-  // Additional check to warn about HTTP usage
-  if (API_BASE_URL.startsWith('http:')) {
-    console.error('WARNING: API_BASE_URL is still using HTTP! This will cause Mixed Content errors.');
-  }
 }
 
 export interface AnalysisResult {
@@ -128,10 +128,12 @@ class ApiClient {
     }
   }
 
-  private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+  private getHeaders(skipContentType = false): HeadersInit {
+    const headers: HeadersInit = {};
+    
+    if (!skipContentType) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
@@ -292,7 +294,7 @@ class ApiClient {
       console.log('API: Uploading file to:', url);
       const response = await fetch(url, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(true), // Skip Content-Type for FormData
         body: formData,
       });
 
@@ -359,7 +361,7 @@ class ApiClient {
       console.log('API: Uploading multiple files to:', url);
       const response = await fetch(url, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(true), // Skip Content-Type for FormData
         body: formData,
       });
 
