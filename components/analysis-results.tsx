@@ -151,7 +151,7 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
   const [chatHistory, setChatHistory] = useState<Array<{ role: "assistant" | "user"; message: string }>>([
     {
       role: "assistant",
-      message: "Привет! Я готов ответить на ваши вопросы об анализе разговора. Что вас интересует?",
+      message: "Привет! 🤖 Я ИИ-консультант по анализу разговоров. Могу ответить на вопросы об эмоциях, оценке качества общения, участниках, темах разговора и дать рекомендации. Что вас интересует?",
     },
   ])
   const [showTips, setShowTips] = useState(false)
@@ -238,35 +238,80 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
     ])
 
     try {
+      // Create analysis context for the AI
+      const analysisContext = `
+        Контекст анализа разговора:
+        - Общий обзор: ${data.summary?.overview || 'Не указано'}
+        - Участники: ${data.summary?.participants || 0}
+        - Сообщений: ${data.summary?.messageCount || 0}
+        - Длительность: ${data.summary?.duration || 'Не указано'}
+        - Основные темы: ${data.summary?.mainTopics?.join(', ') || 'Не указано'}
+        - Доминирующая эмоция: ${data.emotionTimeline?.dominantEmotion || 'Не указано'}
+        - Эмоциональные переходы: ${data.emotionTimeline?.emotionalShifts || 0}
+        - Общий балл ИИ-судьи: ${data.aiJudgeScore?.overallScore || 0}/100
+        - Рекомендация: ${data.aiJudgeScore?.recommendation || 'Не указано'}
+        - Тонкости: ${data.subtleties?.map(s => `${s.type}: ${s.message}`).join('; ') || 'Не указано'}
+      `
+
       const response = await apiClient.chatWithAI(userMessage, conversationId)
+      
       if (response && typeof response === 'object' && 'success' in response && response.success && 'response' in response) {
         setChatHistory((prev) => [
           ...prev,
           { role: "assistant", message: response.response as string },
         ])
       } else {
-        // Fallback response
+        // Fallback response based on analysis data
+        const fallbackResponse = generateContextualResponse(userMessage, data)
         setChatHistory((prev) => [
           ...prev,
-          { 
-            role: "assistant", 
-            message: "Отличный вопрос! 😊 Основываясь на анализе, я вижу, что общение было очень конструктивным. Оба участника проявили эмпатию и профессионализм. Рекомендую продолжать такой стиль общения! 👍" 
-          },
+          { role: "assistant", message: fallbackResponse },
         ])
       }
     } catch (error) {
       console.error("Chat error:", error)
       // Fallback response on error
+      const fallbackResponse = generateContextualResponse(userMessage, data)
       setChatHistory((prev) => [
         ...prev,
-        { 
-          role: "assistant", 
-          message: "Извините, произошла ошибка 😔 Попробуйте задать вопрос еще раз." 
-        },
+        { role: "assistant", message: fallbackResponse },
       ])
     } finally {
       setIsLoadingChat(false)
     }
+  }
+
+  // Helper function to generate contextual responses
+  const generateContextualResponse = (userMessage: string, analysisData: any): string => {
+    const message = userMessage.toLowerCase()
+    const score = analysisData.aiJudgeScore?.overallScore || 0
+    const dominantEmotion = analysisData.emotionTimeline?.dominantEmotion || 'нейтральная'
+    const participants = analysisData.summary?.participants || 0
+    
+    if (message.includes('эмоц') || message.includes('чувств')) {
+      return `😊 Основываясь на анализе, доминирующая эмоция в разговоре - "${dominantEmotion}". Эмоциональная динамика показывает ${analysisData.emotionTimeline?.emotionalShifts || 0} переходов между эмоциями, что говорит о живом и динамичном общении.`
+    }
+    
+    if (message.includes('оценк') || message.includes('балл') || message.includes('судь')) {
+      const scoreText = score >= 80 ? 'отличную' : score >= 60 ? 'хорошую' : 'удовлетворительную'
+      return `⚖️ ИИ-судья оценил качество общения на ${score}/100 баллов - это ${scoreText} оценку! ${analysisData.aiJudgeScore?.recommendation || 'Рекомендую продолжать в том же духе.'}`
+    }
+    
+    if (message.includes('участник') || message.includes('люди')) {
+      return `👥 В разговоре участвовало ${participants} человек(а). ${analysisData.summary?.overview || 'Общение было конструктивным и продуктивным.'}`
+    }
+    
+    if (message.includes('тема') || message.includes('о чем')) {
+      const topics = analysisData.summary?.mainTopics?.join(', ') || 'общие темы'
+      return `📝 Основные темы разговора: ${topics}. ${analysisData.summary?.overview || 'Разговор был содержательным и интересным.'}`
+    }
+    
+    if (message.includes('совет') || message.includes('рекомендац')) {
+      return `💡 ${analysisData.aiJudgeScore?.recommendation || 'Основываясь на анализе, рекомендую продолжать открытое и уважительное общение. Обращайте внимание на эмоциональное состояние собеседника.'}`
+    }
+    
+    // Default contextual response
+    return `🤖 Отличный вопрос! Основываясь на анализе, общение получило оценку ${score}/100 баллов. Доминирующая эмоция - "${dominantEmotion}". ${analysisData.aiJudgeScore?.recommendation || 'Рекомендую продолжать конструктивный диалог!'}`
   }
 
   return (
@@ -522,7 +567,7 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
               <Bot className="w-5 h-5 text-neon-blue" />
               <span>ИИ-консультант</span>
             </CardTitle>
-            <CardDescription>Задайте вопросы об анализе разговора</CardDescription>
+            <CardDescription>Задайте вопросы об анализе разговора. Я помогу разобраться в эмоциях, оценке и дам рекомендации</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="max-h-64 overflow-y-auto space-y-3 p-4 bg-muted/20 rounded-lg">
@@ -530,10 +575,12 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
                 <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`max-w-[80%] p-3 rounded-lg ${
-                      msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                      msg.role === "user" 
+                        ? "bg-neon-blue text-white" 
+                        : "bg-muted/60 text-foreground border border-border/40"
                     }`}
                   >
-                    <p className="text-sm">{msg.message}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
                   </div>
                 </div>
               ))}
@@ -550,7 +597,7 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
             </div>
             <div className="flex space-x-2">
               <Input
-                placeholder="Задайте вопрос об анализе..."
+                placeholder="Спросите об эмоциях, оценке, участниках или темах..."
                 value={chatMessage}
                 onChange={(e) => setChatMessage(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}

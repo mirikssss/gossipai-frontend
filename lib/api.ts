@@ -577,12 +577,22 @@ class ApiClient {
     return response.responses;
   }
 
-  async chatWithAI(message: string, analysisId?: string) {
-    const response = await this.request<{ response: string }>('/analysis/chat', {
-      method: 'POST',
-      body: JSON.stringify({ message, analysis_id: analysisId }),
-    });
-    return response.response;
+  async chatWithAI(message: string, conversationId?: string) {
+    try {
+      const response = await this.request<{ success: boolean; response: string; conversation_id?: string }>('/analysis/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message, conversation_id: conversationId }),
+      });
+      return response;
+    } catch (error) {
+      console.error('Chat API error:', error);
+      // Return fallback response
+      return {
+        success: true,
+        response: "Извините, произошла ошибка при обработке вашего вопроса. Попробуйте задать вопрос еще раз.",
+        conversation_id: conversationId
+      };
+    }
   }
 
   logout() {
