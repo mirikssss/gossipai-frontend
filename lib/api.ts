@@ -1,16 +1,22 @@
 // Force HTTPS - prevent Mixed Content errors
 // Hard-coded fallback for production if env var is missing or incorrect
 let baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-f9f8.up.railway.app';
-// Always ensure HTTPS
+// Always ensure HTTPS - double check to prevent Mixed Content errors
 baseUrl = baseUrl.replace(/^http:\/\//i, 'https://');
 
-const API_BASE_URL = `${baseUrl}/api/v1`;
+// Make sure we don't have double slashes in the API URL
+const API_BASE_URL = `${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}api/v1`;
 
 // Debug logging
 if (typeof window !== 'undefined') {
   console.log('API_BASE_URL:', API_BASE_URL);
   console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
   console.log('Environment check - Mixed Content fix applied');
+  
+  // Additional check to warn about HTTP usage
+  if (API_BASE_URL.startsWith('http:')) {
+    console.error('WARNING: API_BASE_URL is still using HTTP! This will cause Mixed Content errors.');
+  }
 }
 
 export interface AnalysisResult {
@@ -281,8 +287,9 @@ class ApiClient {
     if (temperature) formData.append('temperature', temperature.toString());
 
     try {
-      // Using custom fetch for FormData
-      const url = `${API_BASE_URL}/analysis/upload`;
+      // Using custom fetch for FormData, ensure HTTPS
+      const url = `${API_BASE_URL}/analysis/upload`.replace(/^http:\/\//i, 'https://');
+      console.log('API: Uploading file to:', url);
       const response = await fetch(url, {
         method: 'POST',
         headers: this.getHeaders(),
@@ -347,8 +354,9 @@ class ApiClient {
     if (temperature) formData.append('temperature', temperature.toString());
 
     try {
-      // Using custom fetch for FormData
-      const url = `${API_BASE_URL}/analysis/upload`;
+      // Using custom fetch for FormData, ensure HTTPS
+      const url = `${API_BASE_URL}/analysis/upload`.replace(/^http:\/\//i, 'https://');
+      console.log('API: Uploading multiple files to:', url);
       const response = await fetch(url, {
         method: 'POST',
         headers: this.getHeaders(),
