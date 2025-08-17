@@ -35,7 +35,7 @@ export function PresetCard({ preset, isSelected = false, onSelect }: PresetCardP
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <Card
-        className={`transition-all duration-300 cursor-pointer ${
+        className={`transition-all duration-300 cursor-pointer w-full ${
           isSelected
             ? `border-${preset.color}/40 bg-${preset.color}/10`
             : "border-border/40 bg-card/50 hover:border-neon-blue/40"
@@ -46,14 +46,14 @@ export function PresetCard({ preset, isSelected = false, onSelect }: PresetCardP
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <motion.div
-                className="text-2xl"
+                className="text-xl sm:text-2xl flex-shrink-0"
                 animate={isSelected ? { scale: [1, 1.1, 1] } : {}}
                 transition={{ duration: 0.3 }}
               >
                 {preset.icon}
               </motion.div>
-              <div>
-                <CardTitle className="text-lg">{preset.name}</CardTitle>
+              <div className="min-w-0 flex-1">
+                <CardTitle className="text-base sm:text-lg truncate">{preset.name}</CardTitle>
               </div>
             </div>
             {isSelected && (
@@ -61,20 +61,20 @@ export function PresetCard({ preset, isSelected = false, onSelect }: PresetCardP
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                className="w-6 h-6 rounded-full bg-gradient-to-r from-neon-purple to-neon-blue flex items-center justify-center"
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-neon-purple to-neon-blue flex items-center justify-center flex-shrink-0"
               >
-                <Check className="w-4 h-4 text-white" />
+                <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </motion.div>
             )}
           </div>
         </CardHeader>
         <CardContent>
-          <CardDescription className="text-sm">{preset.description}</CardDescription>
+          <CardDescription className="text-xs sm:text-sm leading-relaxed">{preset.description}</CardDescription>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               variant={isSelected ? "default" : "outline"}
               size="sm"
-              className={`mt-4 w-full ${
+              className={`mt-3 sm:mt-4 w-full text-xs sm:text-sm ${
                 isSelected
                   ? "bg-gradient-to-r from-neon-purple to-neon-blue"
                   : "border-neon-blue/20 hover:bg-neon-blue/10"
