@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
+import { ErrorDisplay } from "@/components/ui/error-display"
 import { apiClient } from "@/lib/api"
 import { motion } from "framer-motion"
 // import { useToast } from "@/components/ui/use-toast"
@@ -47,44 +48,51 @@ export default function PresetsPage() {
   })
   const [presets, setPresets] = useState<Preset[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   // const { toast } = useToast()
   const router = useRouter()
 
-  useEffect(() => {
-    const loadPresets = async () => {
-      try {
-        setIsLoading(true)
-        const presetsData = await apiClient.getPresets()
-        if (presetsData && Array.isArray(presetsData)) {
-          setPresets(presetsData)
+  const loadPresets = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      console.log('API: Getting presets')
+      const presetsData = await apiClient.getPresets()
+      console.log('API: Presets loaded:', presetsData)
+      
+      if (presetsData && Array.isArray(presetsData)) {
+        setPresets(presetsData)
+        
+        // Get the user's previous preset selection from localStorage if available
+        const savedPresetId = localStorage.getItem('selectedPresetId')
+        if (savedPresetId && presetsData.some(p => p.id === savedPresetId)) {
+          setSelectedPreset(savedPresetId)
           
-          // Get the user's previous preset selection from localStorage if available
-          const savedPresetId = localStorage.getItem('selectedPresetId')
-          if (savedPresetId && presetsData.some(p => p.id === savedPresetId)) {
-            setSelectedPreset(savedPresetId)
-            
-            // Set the temperature based on the selected preset
-            const preset = presetsData.find(p => p.id === savedPresetId)
-            if (preset && preset.temperature) {
-              setTemperature([preset.temperature])
-            }
-          } else if (presetsData.length > 0) {
-            // Set default preset if none is selected
-            setSelectedPreset(presetsData[0].id)
-            if (presetsData[0].temperature) {
-              setTemperature([presetsData[0].temperature])
-            }
+          // Set the temperature based on the selected preset
+          const preset = presetsData.find(p => p.id === savedPresetId)
+          if (preset && preset.temperature) {
+            setTemperature([preset.temperature])
           }
-        } else {
-          console.error("Failed to load presets")
+        } else if (presetsData.length > 0) {
+          // Set default preset if none is selected
+          setSelectedPreset(presetsData[0].id)
+          if (presetsData[0].temperature) {
+            setTemperature([presetsData[0].temperature])
+          }
         }
-      } catch (error) {
-        console.error("Error loading presets:", error)
-      } finally {
-        setIsLoading(false)
+      } else {
+        console.error("Failed to load presets - invalid data format")
+        setError("Неверный формат данных от сервера")
       }
+    } catch (error) {
+      console.error("Error loading presets:", error)
+      setError(error instanceof Error ? error.message : "Неизвестная ошибка при загрузке пресетов")
+    } finally {
+      setIsLoading(false)
     }
-    
+  }
+
+  useEffect(() => {
     loadPresets()
   }, [])
   
@@ -118,13 +126,26 @@ export default function PresetsPage() {
     )
   }
 
-  if (presets.length === 0) {
+  if (error) {
+    return (
+      <DashboardLayout>
+        <ErrorDisplay 
+          error={error}
+          onRetry={loadPresets}
+          title="Ошибка загрузки пресетов"
+          description="Не удалось загрузить список пресетов для анализа. Проверьте подключение к интернету и попробуйте снова."
+        />
+      </DashboardLayout>
+    )
+  }
+
+  if (presets.length === 0 && !isLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-4">
-            <p className="text-muted-foreground">Не удалось загрузить пресеты</p>
-            <Button onClick={() => window.location.reload()}>
+            <p className="text-muted-foreground">Пресеты не найдены</p>
+            <Button onClick={loadPresets}>
               Попробовать снова
             </Button>
           </div>

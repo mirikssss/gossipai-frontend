@@ -44,7 +44,7 @@ export default function DashboardPage() {
         }
       }
       
-      const userData = await apiClient.getCurrentUser()
+      const userData = await apiClient.getUser()
       setUser(userData)
     } catch (error) {
       console.error("Auth check failed:", error)

@@ -30,7 +30,7 @@ export default function RegisterPage() {
     setError("")
 
     try {
-      await apiClient.register(formData.name, formData.email, formData.password)
+      await apiClient.register(formData.email, formData.password, formData.name)
       router.push("/dashboard")
     } catch (err) {
       setError("Ошибка при регистрации. Попробуйте еще раз.")

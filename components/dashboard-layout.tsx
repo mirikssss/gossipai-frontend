@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Menu, LayoutDashboard, History, Settings, Sliders, LogOut } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -114,6 +114,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Mobile Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-72 p-0 bg-card/95 backdrop-blur">
+          <SheetTitle>GossipAI</SheetTitle>
+          <SheetDescription>
+            GossipAI is an AI-powered chat application that allows you to have conversations with AI models.
+          </SheetDescription>
           <Sidebar mobile />
         </SheetContent>
       </Sheet>
