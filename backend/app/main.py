@@ -9,23 +9,35 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Set up CORS with fallback
+# Set up CORS with comprehensive origins
 cors_origins = [
+    # Development
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:8000",
-    "http://127.0.0.1:8000"
+    "http://127.0.0.1:8000",
+    # Production - Vercel frontend
+    "https://gossipai-frontend.vercel.app",
+    "https://gossipai.vercel.app",
+    # Add any other production domains
 ]
 
+# Add custom origins from environment
 if settings.BACKEND_CORS_ORIGINS:
     cors_origins.extend([str(origin) for origin in settings.BACKEND_CORS_ORIGINS])
+
+# Remove duplicates while preserving order
+cors_origins = list(dict.fromkeys(cors_origins))
+
+print(f"CORS Origins configured: {cors_origins}")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include API router
@@ -37,5 +49,6 @@ async def root():
     return {
         "message": f"Welcome to {settings.PROJECT_NAME} API",
         "docs_url": "/docs",
-        "version": "0.1.0"
+        "version": "0.1.0",
+        "cors_origins": cors_origins
     }

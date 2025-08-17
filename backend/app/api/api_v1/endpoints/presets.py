@@ -7,22 +7,26 @@ from app.api.deps import get_current_user
 router = APIRouter()
 
 @router.get("/", response_model=List[Preset])
-async def get_all_presets(current_user: User = Depends(get_current_user)):
+async def get_all_presets():
     """
     Получить список всех доступных пресетов анализа
     """
     return ALL_PRESETS
 
 @router.get("/standard-cards")
-async def get_standard_analysis_cards(current_user: User = Depends(get_current_user)):
+async def get_standard_analysis_cards():
     """
-    Получить список стандартных карточек анализа, которые отображаются для всех пресетов
+    Получить стандартные карточки анализа
     """
     return STANDARD_CARDS
 
 @router.get("/{preset_id}", response_model=Preset)
-async def get_preset_details(preset_id: str, current_user: User = Depends(get_current_user)):
+async def get_preset(preset_id: str):
     """
-    Получить детальную информацию о конкретном пресете
+    Получить конкретный пресет по ID
     """
-    return get_preset_by_id(preset_id)
+    preset = get_preset_by_id(preset_id)
+    if not preset:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Preset not found")
+    return preset

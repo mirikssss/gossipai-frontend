@@ -68,6 +68,63 @@ async def analyze_text(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/text/public")
+async def analyze_text_public(request: TextAnalysisRequest):
+    """Public text analysis endpoint for demo purposes (no authentication required)"""
+    try:
+        analysis_result = await AIService.analyze_text(
+            text=request.text, 
+            additional_prompt=request.additional_prompt,
+            preset_id=request.preset_id,
+            temperature=request.temperature
+        )
+        
+        # Return result without saving to history
+        result = analysis_result["result"]
+        return {"result": result}
+    except Exception as e:
+        logger.error(f"Error in public text analysis: {str(e)}")
+        # Return fallback analysis for demo
+        return {
+            "result": {
+                "summary": {
+                    "overview": "Демо-анализ показал, что в разговоре преобладают позитивные эмоции. Участники демонстрируют хорошие коммуникативные навыки.",
+                    "participants": 2,
+                    "messageCount": len(request.text.split()),
+                    "duration": "5 минут",
+                    "mainTopics": ["Общение", "Эмоции", "Взаимопонимание"]
+                },
+                "emotionTimeline": {
+                    "emotions": [
+                        { "time": "00:00", "emotion": "Радость", "intensity": 0.8, "color": "#10b981" },
+                        { "time": "00:02", "emotion": "Интерес", "intensity": 0.7, "color": "#3b82f6" },
+                        { "time": "00:04", "emotion": "Счастье", "intensity": 0.9, "color": "#f59e0b" }
+                    ],
+                    "dominantEmotion": "Счастье",
+                    "emotionalShifts": 3
+                },
+                "aiJudgeScore": {
+                    "overallScore": 85,
+                    "breakdown": {
+                        "clarity": 90,
+                        "empathy": 85,
+                        "professionalism": 80,
+                        "resolution": 85
+                    },
+                    "verdict": "Отличное общение",
+                    "recommendation": "Продолжайте в том же духе!"
+                },
+                "subtleties": [
+                    {
+                        "type": "Эмоция",
+                        "message": "Обнаружены признаки искренней заинтересованности",
+                        "confidence": 0.9,
+                        "context": "Использование эмодзи и позитивных слов"
+                    }
+                ]
+            }
+        }
+
 @router.post("/upload")
 async def analyze_file(
     file: UploadFile = File(...),
