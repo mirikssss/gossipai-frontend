@@ -220,6 +220,9 @@ class AIService:
 
             {preset_instructions}
             
+            ВАЖНО: Если текст короткий или содержит мало информации, все равно проведи анализ на основе доступных данных.
+            Даже короткие фразы могут содержать эмоциональную информацию.
+            
             {f"Дополнительные инструкции: {additional_prompt}" if additional_prompt else ""}
 
             Предоставь анализ в следующем JSON формате (give answers in russian):
@@ -291,9 +294,15 @@ class AIService:
                     json_start = result.find("```json") + 7
                     json_end = result.find("```", json_start)
                     json_str = result[json_start:json_end].strip()
+                elif "```" in result:
+                    # Handle other markdown code blocks
+                    json_start = result.find("```") + 3
+                    json_end = result.find("```", json_start)
+                    json_str = result[json_start:json_end].strip()
                 else:
                     json_str = result.strip()
                 
+                logger.info(f"Attempting to parse JSON: {json_str[:200]}...")
                 parsed_result = json.loads(json_str)
                 
                 # Add preset-specific data to the result if preset is provided
@@ -322,6 +331,8 @@ class AIService:
             
         except Exception as e:
             logger.error(f"Error in text analysis: {str(e)}")
+            logger.error(f"Text length: {len(text)} characters")
+            logger.error(f"Text preview: {text[:200]}...")
             # Fallback to mock analysis
             logger.warning("Falling back to mock analysis due to error")
             return await AIService.mock_analysis_result(preset_id)
@@ -366,7 +377,7 @@ class AIService:
             """
             
             logger.info("Generating chat response with Gemini")
-            model = GenerativeModel("gemini-2.0-pro")
+            model = GenerativeModel("gemini-2.5-pro")
             response = model.generate_content(chat_prompt)
             
             ai_response = response.text.strip()
