@@ -21,12 +21,13 @@ class SpeechService:
                 logger.info("Attempting to use default credentials...")
                 # Try to continue without explicit credentials
             
-            # Check if credentials file exists
-            creds_path = settings.GOOGLE_APPLICATION_CREDENTIALS
-            if not os.path.exists(creds_path):
-                logger.warning(f"Credentials file not found: {creds_path}")
-                logger.info("Attempting to use credentials from environment variable...")
-                # Try to continue without file - credentials might be set via environment
+            # Check if credentials file exists (only if it's a file path)
+            if settings.GOOGLE_APPLICATION_CREDENTIALS:
+                creds_path = settings.GOOGLE_APPLICATION_CREDENTIALS
+                if not creds_path.startswith('{') and not os.path.exists(creds_path):
+                    logger.warning(f"Credentials file not found: {creds_path}")
+                    logger.info("Attempting to use credentials from environment variable...")
+                    # Try to continue without file - credentials might be set via environment
             
             # Initialize Speech client
             client = speech.SpeechClient()

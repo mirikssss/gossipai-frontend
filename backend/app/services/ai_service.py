@@ -11,8 +11,32 @@ logger = logging.getLogger(__name__)
 
 # Set Google Cloud credentials environment variable
 if settings.GOOGLE_APPLICATION_CREDENTIALS:
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.GOOGLE_APPLICATION_CREDENTIALS
-    logger.info(f"Set GOOGLE_APPLICATION_CREDENTIALS to: {settings.GOOGLE_APPLICATION_CREDENTIALS}")
+    # Check if it's a JSON string or file path
+    if settings.GOOGLE_APPLICATION_CREDENTIALS.startswith('{'):
+        # It's a JSON string, create a temporary file
+        import tempfile
+        import json
+        
+        try:
+            # Parse the JSON to validate it
+            creds_data = json.loads(settings.GOOGLE_APPLICATION_CREDENTIALS)
+            
+            # Create a temporary file with the credentials
+            temp_creds_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+            json.dump(creds_data, temp_creds_file)
+            temp_creds_file.close()
+            
+            # Set the environment variable to the temporary file path
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_creds_file.name
+            logger.info(f"Created temporary credentials file: {temp_creds_file.name}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in GOOGLE_APPLICATION_CREDENTIALS: {e}")
+            # Try to use as file path
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.GOOGLE_APPLICATION_CREDENTIALS
+    else:
+        # It's a file path
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.GOOGLE_APPLICATION_CREDENTIALS
+        logger.info(f"Set GOOGLE_APPLICATION_CREDENTIALS to file path: {settings.GOOGLE_APPLICATION_CREDENTIALS}")
 
 # Initialize Vertex AI with error handling
 vertex_ai_initialized = False
@@ -46,13 +70,13 @@ class AIService:
                 logger.warning("GOOGLE_APPLICATION_CREDENTIALS not set in settings")
                 logger.info("Attempting to use default credentials...")
                 # Try to continue without explicit credentials
-            
-            # Check if credentials file exists
-            creds_path = settings.GOOGLE_APPLICATION_CREDENTIALS
-            if not os.path.exists(creds_path):
-                logger.warning(f"Credentials file not found: {creds_path}")
-                logger.info("Attempting to use credentials from environment variable...")
-                # Try to continue without file - credentials might be set via environment
+            else:
+                # Check if credentials file exists (only if it's a file path)
+                creds_path = settings.GOOGLE_APPLICATION_CREDENTIALS
+                if not creds_path.startswith('{') and not os.path.exists(creds_path):
+                    logger.warning(f"Credentials file not found: {creds_path}")
+                    logger.info("Attempting to use credentials from environment variable...")
+                    # Try to continue without file - credentials might be set via environment
             
             logger.info("Initializing Gemini model")
             # Use the correct Gemini model for Vertex AI
