@@ -198,9 +198,12 @@ class ApiClient {
   }
 
   async register(email: string, password: string, name: string) {
+    const requestBody = { email, password, name };
+    console.log("API: Sending registration request:", requestBody);
+    
     const response = await this.request<RegisterResponse>('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify(requestBody),
     });
     
     this.token = response.access_token;

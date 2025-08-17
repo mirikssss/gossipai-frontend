@@ -29,10 +29,19 @@ export default function RegisterPage() {
     setIsLoading(true)
     setError("")
 
+    // Debug logging
+    console.log("Registration form data:", formData)
+    console.log("Sending to API:", {
+      email: formData.email,
+      password: formData.password,
+      name: formData.name
+    })
+
     try {
       await apiClient.register(formData.email, formData.password, formData.name)
       router.push("/dashboard")
     } catch (err) {
+      console.error("Registration error:", err)
       setError("Ошибка при регистрации. Попробуйте еще раз.")
     } finally {
       setIsLoading(false)
