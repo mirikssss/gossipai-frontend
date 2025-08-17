@@ -246,7 +246,7 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete, isAnalyzing
       console.log("Отправка файлов на анализ...")
       console.log("Используемый пресет:", presetId)
       console.log("Используемая температура:", temperature)
-      const result = await apiClient.analyzeMultipleFiles(files.map(f => f.file), presetId, temperature)
+      const result = await apiClient.analyzeMultipleFiles(files.map(f => f.file), additionalPrompt, presetId, temperature)
       console.log("Получен результат анализа файлов:", result)
       
       if (onAnalysisComplete && result) {
