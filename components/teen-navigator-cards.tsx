@@ -151,12 +151,18 @@ export function TeenNavigatorCards({ data }: TeenNavigatorCardsProps) {
             {data.emotion_dictionary && data.emotion_dictionary.hidden_emotions?.length ? (
               <>
                 <div className="space-y-4">
-                  {data.emotion_dictionary.hidden_emotions.map((emotion, index) => (
-                    <div key={index} className="bg-muted/30 rounded-lg p-4 border border-neon-purple/10">
-                      <h4 className="text-md font-medium mb-2">{emotion.text}</h4>
-                      <p className="text-sm text-muted-foreground">{emotion.explanation}</p>
+                  {data.emotion_dictionary.hidden_emotions && data.emotion_dictionary.hidden_emotions.length > 0 ? (
+                    data.emotion_dictionary.hidden_emotions.map((emotion, index) => (
+                      <div key={index} className="bg-muted/30 rounded-lg p-4 border border-neon-purple/10">
+                        <h4 className="text-md font-medium mb-2">{emotion.text}</h4>
+                        <p className="text-sm text-muted-foreground">{emotion.explanation}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-muted-foreground py-4">
+                      Скрытые эмоции не обнаружены
                     </div>
-                  ))}
+                  )}
                 </div>
               </>
             ) : (

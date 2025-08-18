@@ -83,16 +83,22 @@ export function FamilyBalanceCards({ data }: FamilyBalanceCardsProps) {
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Паттерны коммуникации:</h4>
                   <div className="space-y-2">
-                    {data.communication_cycles.patterns?.map((pattern, index) => (
-                      <div key={index} className="bg-muted/30 rounded-lg p-3 border border-neon-turquoise/10">
-                        <div className="flex items-center space-x-2">
-                          <div className="h-8 w-8 rounded-full flex items-center justify-center bg-gradient-to-r from-neon-turquoise/20 to-neon-blue/20">
-                            <span className="text-sm font-bold">{index + 1}</span>
+                    {data.communication_cycles.patterns && data.communication_cycles.patterns.length > 0 ? (
+                      data.communication_cycles.patterns.map((pattern, index) => (
+                        <div key={index} className="bg-muted/30 rounded-lg p-3 border border-neon-turquoise/10">
+                          <div className="flex items-center space-x-2">
+                            <div className="h-8 w-8 rounded-full flex items-center justify-center bg-gradient-to-r from-neon-turquoise/20 to-neon-blue/20">
+                              <span className="text-sm font-bold">{index + 1}</span>
+                            </div>
+                            <p className="text-sm">{pattern}</p>
                           </div>
-                          <p className="text-sm">{pattern}</p>
                         </div>
+                      ))
+                    ) : (
+                      <div className="text-center text-muted-foreground py-2">
+                        Паттерны не обнаружены
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
                 

@@ -260,41 +260,55 @@ export function StrategicHrCards({ data }: StrategicHrCardsProps) {
           <CardContent className="space-y-4">
             {data.professional_growth?.skill_analysis ? (
               <>
-                {data.professional_growth.skill_analysis.map((person, index) => (
-                  <div key={index} className="bg-muted/30 rounded-lg p-4 border border-neon-blue/10">
-                    <h4 className="text-md font-medium mb-3">{person.person}</h4>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <h5 className="text-sm font-medium mb-1 flex items-center">
-                          <span className="text-green-500 mr-2">✓</span>
-                          Сильные стороны:
-                        </h5>
-                        <div className="flex flex-wrap gap-2">
-                          {person.strengths.map((strength, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs border-green-500/40 text-green-500">
-                              {strength}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
+                {data.professional_growth.skill_analysis && data.professional_growth.skill_analysis.length > 0 ? (
+                  data.professional_growth.skill_analysis.map((person, index) => (
+                    <div key={index} className="bg-muted/30 rounded-lg p-4 border border-neon-blue/10">
+                      <h4 className="text-md font-medium mb-3">{person.person}</h4>
                       
-                      <div>
-                        <h5 className="text-sm font-medium mb-1 flex items-center">
-                          <span className="text-yellow-500 mr-2">○</span>
-                          Зоны развития:
-                        </h5>
-                        <div className="flex flex-wrap gap-2">
-                          {person.areas_to_develop.map((area, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs border-yellow-500/40 text-yellow-500">
-                              {area}
-                            </Badge>
-                          ))}
+                      <div className="space-y-3">
+                        <div>
+                          <h5 className="text-sm font-medium mb-1 flex items-center">
+                            <span className="text-green-500 mr-2">✓</span>
+                            Сильные стороны:
+                          </h5>
+                          <div className="flex flex-wrap gap-2">
+                            {person.strengths && person.strengths.length > 0 ? (
+                              person.strengths.map((strength, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs border-green-500/40 text-green-500">
+                                  {strength}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-sm text-muted-foreground">Не указаны</span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h5 className="text-sm font-medium mb-1 flex items-center">
+                            <span className="text-yellow-500 mr-2">○</span>
+                            Зоны развития:
+                          </h5>
+                          <div className="flex flex-wrap gap-2">
+                            {person.areas_to_develop && person.areas_to_develop.length > 0 ? (
+                              person.areas_to_develop.map((area, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs border-yellow-500/40 text-yellow-500">
+                                  {area}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-sm text-muted-foreground">Не указаны</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center text-muted-foreground py-4">
+                    Данные о навыках недоступны
                   </div>
-                ))}
+                )}
                 
                 <div className="pt-3 border-t border-border/40">
                   <h4 className="text-sm font-medium mb-2">Рекомендации по обучению:</h4>
