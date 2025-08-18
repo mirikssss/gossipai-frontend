@@ -369,19 +369,25 @@ export function UploadSection({ onAnalysisStart, onAnalysisComplete, isAnalyzing
                     onDragEnd={handleDragEnd}
                   >
                     <SortableContext
-                      items={uploadedFiles.map(f => f.id)}
+                      items={uploadedFiles && uploadedFiles.length > 0 ? uploadedFiles.map(f => f.id) : []}
                       strategy={verticalListSortingStrategy}
                     >
                       <div className="space-y-2">
-                        {uploadedFiles.map((file, index) => (
-                          <SortableFileItem
-                            key={file.id}
-                            file={file}
-                            index={index}
-                            onRemove={removeFile}
-                            isAnalyzing={isAnalyzing}
-                          />
-                        ))}
+                        {uploadedFiles && uploadedFiles.length > 0 ? (
+                          uploadedFiles.map((file, index) => (
+                            <SortableFileItem
+                              key={file.id}
+                              file={file}
+                              index={index}
+                              onRemove={removeFile}
+                              isAnalyzing={isAnalyzing}
+                            />
+                          ))
+                        ) : (
+                          <div className="text-center text-muted-foreground py-4">
+                            Файлы не загружены
+                          </div>
+                        )}
                       </div>
                     </SortableContext>
                   </DndContext>

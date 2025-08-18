@@ -580,19 +580,25 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="max-h-64 overflow-y-auto space-y-3 p-4 bg-muted/20 rounded-lg">
-              {chatHistory.map((msg, index) => (
-                <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
-                      msg.role === "user" 
-                        ? "bg-neon-blue text-white" 
-                        : "bg-muted/60 text-foreground border border-border/40"
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+              {chatHistory && chatHistory.length > 0 ? (
+                chatHistory.map((msg, index) => (
+                  <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[80%] p-3 rounded-lg ${
+                        msg.role === "user" 
+                          ? "bg-neon-blue text-white" 
+                          : "bg-muted/60 text-foreground border border-border/40"
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center text-muted-foreground py-4">
+                  Начните диалог с ИИ-консультантом
                 </div>
-              ))}
+              )}
               {isLoadingChat && (
                 <div className="flex justify-start">
                   <div className="max-w-[80%] p-3 rounded-lg bg-muted text-foreground">
@@ -658,18 +664,24 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
                     <span className="ml-2 text-sm text-muted-foreground">Генерируем советы...</span>
                   </div>
                 ) : (
-                  suggestedResponses.map((suggestion, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="p-4 bg-muted/30 rounded-lg border border-neon-turquoise/10"
-                    >
-                      <p className="text-sm text-foreground font-medium mb-2">{suggestion.text}</p>
-                      <p className="text-xs text-muted-foreground">{suggestion.reason}</p>
-                    </motion.div>
-                  ))
+                  suggestedResponses && suggestedResponses.length > 0 ? (
+                    suggestedResponses.map((suggestion, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        className="p-4 bg-muted/30 rounded-lg border border-neon-turquoise/10"
+                      >
+                        <p className="text-sm text-foreground font-medium mb-2">{suggestion.text}</p>
+                        <p className="text-xs text-muted-foreground">{suggestion.reason}</p>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="text-center text-muted-foreground py-4">
+                      Советы по общению не найдены
+                    </div>
+                  )
                 )}
               </motion.div>
             )}
