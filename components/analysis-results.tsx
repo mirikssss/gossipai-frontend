@@ -178,12 +178,12 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
         - Участники: ${data.summary?.participants || 0}
         - Сообщений: ${data.summary?.messageCount || 0}
         - Длительность: ${data.summary?.duration || 'Не указано'}
-        - Основные темы: ${data.summary?.mainTopics?.join(', ') || 'Не указано'}
+        - Основные темы: ${data.summary?.mainTopics && data.summary.mainTopics.length > 0 ? data.summary.mainTopics.join(', ') : 'Не указано'}
         - Доминирующая эмоция: ${data.emotionTimeline?.dominantEmotion || 'Не указано'}
         - Эмоциональные переходы: ${data.emotionTimeline?.emotionalShifts || 0}
         - Общий балл ИИ-судьи: ${data.aiJudgeScore?.overallScore || 0}/100
         - Рекомендация: ${data.aiJudgeScore?.recommendation || 'Не указано'}
-        - Тонкости: ${data.subtleties?.map(s => `${s.type}: ${s.message}`).join('; ') || 'Не указано'}
+        - Тонкости: ${data.subtleties && data.subtleties.length > 0 ? data.subtleties.map(s => `${s.type}: ${s.message}`).join('; ') : 'Не указано'}
       `
 
       const response = await apiClient.getSuggestedResponses(conversationText)
@@ -245,12 +245,12 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
         - Участники: ${data.summary?.participants || 0}
         - Сообщений: ${data.summary?.messageCount || 0}
         - Длительность: ${data.summary?.duration || 'Не указано'}
-        - Основные темы: ${data.summary?.mainTopics?.join(', ') || 'Не указано'}
+        - Основные темы: ${data.summary?.mainTopics && data.summary.mainTopics.length > 0 ? data.summary.mainTopics.join(', ') : 'Не указано'}
         - Доминирующая эмоция: ${data.emotionTimeline?.dominantEmotion || 'Не указано'}
         - Эмоциональные переходы: ${data.emotionTimeline?.emotionalShifts || 0}
         - Общий балл ИИ-судьи: ${data.aiJudgeScore?.overallScore || 0}/100
         - Рекомендация: ${data.aiJudgeScore?.recommendation || 'Не указано'}
-        - Тонкости: ${data.subtleties?.map(s => `${s.type}: ${s.message}`).join('; ') || 'Не указано'}
+        - Тонкости: ${data.subtleties && data.subtleties.length > 0 ? data.subtleties.map(s => `${s.type}: ${s.message}`).join('; ') : 'Не указано'}
       `
 
       const response = await apiClient.chatWithAI(userMessage, conversationId, analysisContext)
@@ -302,7 +302,7 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
     }
     
     if (message.includes('тема') || message.includes('о чем')) {
-      const topics = analysisData.summary?.mainTopics?.join(', ') || 'общие темы'
+      const topics = analysisData.summary?.mainTopics && analysisData.summary.mainTopics.length > 0 ? analysisData.summary.mainTopics.join(', ') : 'общие темы'
       return `📝 Основные темы разговора: ${topics}. ${analysisData.summary?.overview || 'Разговор был содержательным и интересным.'}`
     }
     
@@ -370,11 +370,15 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
               <div className="pt-2">
                 <p className="text-sm text-muted-foreground mb-2">Основные темы:</p>
                 <div className="flex flex-wrap gap-2">
-                  {data.summary?.mainTopics?.map((topic, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {topic}
-                    </Badge>
-                  )) || <span className="text-sm text-muted-foreground">Темы не указаны</span>}
+                  {data.summary?.mainTopics && data.summary.mainTopics.length > 0 ? (
+                    data.summary.mainTopics.map((topic, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {topic}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">Темы не указаны</span>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -407,7 +411,7 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
               </div>
 
               <div className="space-y-3">
-                {data.aiJudgeScore?.breakdown ? (
+                {data.aiJudgeScore?.breakdown && Object.keys(data.aiJudgeScore.breakdown).length > 0 ? (
                   Object.entries(data.aiJudgeScore.breakdown).map(([key, value]) => (
                     <div key={key} className="space-y-1">
                       <div className="flex justify-between text-sm">
@@ -464,9 +468,10 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
               </div>
 
               <div className="space-y-3">
-                {data.emotionTimeline?.emotions?.map((emotion, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <span className="text-xs text-muted-foreground w-12">{emotion.time}</span>
+                {data.emotionTimeline?.emotions && data.emotionTimeline.emotions.length > 0 ? (
+                  data.emotionTimeline.emotions.map((emotion, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <span className="text-xs text-muted-foreground w-12">{emotion.time}</span>
                     <div className="flex-1">
                       <div className="flex justify-between text-sm mb-1">
                         <span className="flex items-center gap-1">{emotion.emotion}</span>
@@ -483,7 +488,8 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
                       </div>
                     </div>
                   </div>
-                )) || (
+                ))
+                ) : (
                   <div className="text-center text-muted-foreground">
                     Данные об эмоциях не доступны
                   </div>
@@ -514,25 +520,27 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
               <CardDescription>Скрытые смыслы и подтексты</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {data.subtleties?.map((subtlety, index) => (
-                <div key={index} className="p-4 rounded-lg bg-muted/50 border border-border/40">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-medium text-sm text-foreground">{subtlety.type}</h4>
-                    <div className="flex items-center space-x-1">
-                      {subtlety.confidence >= 80 ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertTriangle className="w-4 h-4 text-yellow-500" />
-                      )}
-                      <span className="text-xs text-muted-foreground">{subtlety.confidence}%</span>
+              {data.subtleties && data.subtleties.length > 0 ? (
+                data.subtleties.map((subtlety, index) => (
+                  <div key={index} className="p-4 rounded-lg bg-muted/50 border border-border/40">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-medium text-sm text-foreground">{subtlety.type}</h4>
+                      <div className="flex items-center space-x-1">
+                        {subtlety.confidence >= 80 ? (
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                        )}
+                        <span className="text-xs text-muted-foreground">{subtlety.confidence}%</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">{subtlety.message}</p>
+                    <div className="text-xs text-muted-foreground bg-background/50 p-2 rounded border-l-2 border-neon-purple/40">
+                      <strong>Контекст:</strong> {subtlety.context}
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{subtlety.message}</p>
-                  <div className="text-xs text-muted-foreground bg-background/50 p-2 rounded border-l-2 border-neon-purple/40">
-                    <strong>Контекст:</strong> {subtlety.context}
-                  </div>
-                </div>
-              )) || (
+                ))
+              ) : (
                 <div className="text-center text-muted-foreground">
                   Тонкости не обнаружены
                 </div>
