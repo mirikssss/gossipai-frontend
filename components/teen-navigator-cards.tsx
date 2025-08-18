@@ -31,6 +31,9 @@ interface TeenNavigatorCardsProps {
 }
 
 export function TeenNavigatorCards({ data }: TeenNavigatorCardsProps) {
+  // Debug: Log the data structure
+  console.log("TeenNavigatorCards data:", data);
+  
   // Check if preset validation failed
   if (data.preset_validation && !data.preset_validation.is_valid) {
     return (

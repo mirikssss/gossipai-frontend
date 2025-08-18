@@ -37,6 +37,9 @@ interface StrategicHrCardsProps {
 }
 
 export function StrategicHrCards({ data }: StrategicHrCardsProps) {
+  // Debug: Log the data structure
+  console.log("StrategicHrCards data:", data);
+  
   // Check if preset validation failed
   if (data.preset_validation && !data.preset_validation.is_valid) {
     return (

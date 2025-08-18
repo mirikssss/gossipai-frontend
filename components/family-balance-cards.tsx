@@ -31,6 +31,9 @@ interface FamilyBalanceCardsProps {
 }
 
 export function FamilyBalanceCards({ data }: FamilyBalanceCardsProps) {
+  // Debug: Log the data structure
+  console.log("FamilyBalanceCards data:", data);
+  
   // Check if preset validation failed
   if (data.preset_validation && !data.preset_validation.is_valid) {
     return (
