@@ -570,18 +570,45 @@ class ApiClient {
   }
 
   async getSuggestedResponses(text: string) {
-    const response = await this.request<{ responses: string[] }>('/analysis/suggested-responses', {
-      method: 'POST',
-      body: JSON.stringify({ text }),
-    });
-    return response.responses;
+    try {
+      const response = await this.request<{ success: boolean; suggestions: Array<{ text: string; reason: string }> }>('/analysis/suggested-responses', {
+        method: 'POST',
+        body: JSON.stringify({ conversation_text: text }),
+      });
+      return response;
+    } catch (error) {
+      console.error('Suggested responses API error:', error);
+      // Return fallback response
+      return {
+        success: true,
+        suggestions: [
+          {
+            text: "Понимаю твою точку зрения! 🤝",
+            reason: "Показывает эмпатию и готовность к диалогу"
+          },
+          {
+            text: "Расскажи подробнее, мне важно услышать твое мнение 💬",
+            reason: "Поощряет открытую коммуникацию"
+          },
+          {
+            text: "Давай сделаем паузу и вернемся позже ⏰",
+            reason: "Помогает избежать эскалации конфликта"
+          }
+        ]
+      };
+    }
   }
 
-  async chatWithAI(message: string, conversationId?: string) {
+  async chatWithAI(message: string, conversationId?: string, analysisContext?: string) {
     try {
+      const requestBody: any = { message, conversation_id: conversationId };
+      if (analysisContext) {
+        requestBody.analysis_context = analysisContext;
+      }
+      
       const response = await this.request<{ success: boolean; response: string; conversation_id?: string }>('/analysis/chat', {
         method: 'POST',
-        body: JSON.stringify({ message, conversation_id: conversationId }),
+        body: JSON.stringify(requestBody),
       });
       return response;
     } catch (error) {

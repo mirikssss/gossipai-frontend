@@ -253,7 +253,7 @@ export function AnalysisResults({ data }: AnalysisResultsProps) {
         - Тонкости: ${data.subtleties?.map(s => `${s.type}: ${s.message}`).join('; ') || 'Не указано'}
       `
 
-      const response = await apiClient.chatWithAI(userMessage, conversationId)
+      const response = await apiClient.chatWithAI(userMessage, conversationId, analysisContext)
       
       if (response && typeof response === 'object' && 'success' in response && response.success && 'response' in response) {
         setChatHistory((prev) => [
